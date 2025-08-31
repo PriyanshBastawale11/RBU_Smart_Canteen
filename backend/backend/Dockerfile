@@ -22,4 +22,4 @@ ENV PORT 10000
 EXPOSE $PORT
 
 # Run the Spring Boot app
-CMD ["sh", "-c", "java -jar target/rbu-smart-canteen-0.0.1-SNAPSHOT.jar --server.port=$PORT"]
+CMD ["java", "-jar", "target/backend-0.0.1-SNAPSHOT.jar"]
