@@ -55,6 +55,8 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 // Public (no auth) endpoints
+                .requestMatchers("/", "/health", "/api/health").permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
                 // Menu endpoints: GET for any authenticated user; write operations for ADMIN/STAFF
