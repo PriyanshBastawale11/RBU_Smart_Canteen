@@ -8,11 +8,16 @@ services:
     env: docker
     plan: free
     rootDir: backend/backend
-    dockerfilePath: Dockerfile
+    dockerfilePath: backend/backend/Dockerfile
+    dockerContext: backend/backend
     autoDeploy: true
     healthCheckPath: /v3/api-docs
     envVars:
       - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: rbu-smart-canteen-db
+          property: connectionString
+      - key: JDBC_DATABASE_URL
         fromDatabase:
           name: rbu-smart-canteen-db
           property: connectionString
