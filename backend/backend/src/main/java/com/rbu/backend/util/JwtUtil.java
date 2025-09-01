@@ -4,6 +4,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -11,8 +12,12 @@ import java.util.function.Function;
 
 @Component
 public class JwtUtil {
-    private final SecretKey SECRET_KEY = Keys.hmacShaKeyFor("rbu-smart-canteen-secret-key-256-bits-long".getBytes());
+    private final SecretKey SECRET_KEY;
     private final long EXPIRATION = 1000 * 60 * 60 * 10; // 10 hours
+
+    public JwtUtil(@Value("${JWT_SECRET:rbu-smart-canteen-secret-key-256-bits-long}") String secret) {
+        this.SECRET_KEY = Keys.hmacShaKeyFor(secret.getBytes());
+    }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);

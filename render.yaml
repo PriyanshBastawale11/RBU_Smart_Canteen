@@ -1,0 +1,35 @@
+databases:
+  - name: rbu-smart-canteen-db
+    plan: free
+
+services:
+  - type: web
+    name: rbu-smart-canteen-backend
+    env: docker
+    plan: free
+    rootDir: backend/backend
+    dockerfilePath: backend/backend/Dockerfile
+    autoDeploy: true
+    healthCheckPath: /v3/api-docs
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: rbu-smart-canteen-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: rbu-smart-canteen-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: rbu-smart-canteen-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+      # Set these in Render Dashboard after first deploy
+      # - key: SPRING_MAIL_USERNAME
+      #   value: ""
+      # - key: SPRING_MAIL_PASSWORD
+      #   value: ""
+      # - key: ALLOWED_ORIGINS
+      #   value: "https://<your-netlify-site>.netlify.app"
