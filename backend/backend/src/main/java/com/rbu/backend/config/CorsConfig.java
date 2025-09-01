@@ -16,36 +16,38 @@ public class CorsConfig {
 
     @Value("${app.cors.allowed-origins:https://rbu-smart-canteen.netlify.app}")
     private String allowedOrigins;
-    
-    // Optional: allow pattern matching via env, e.g. "https://*.netlify.app" for previews
+
+    // e.g. "https://*.netlify.app"
     @Value("${app.cors.allowed-origin-patterns:}")
     private String allowedOriginPatterns;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
+        CorsConfiguration cfg = new CorsConfiguration();
 
         List<String> origins = Arrays.stream(allowedOrigins.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .collect(Collectors.toList());
-        List<String> originPatterns = Arrays.stream(allowedOriginPatterns.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .collect(Collectors.toList());
+                .map(String::trim).filter(s -> !s.isEmpty()).collect(Collectors.toList());
+        List<String> patterns = Arrays.stream(allowedOriginPatterns.split(","))
+                .map(String::trim).filter(s -> !s.isEmpty()).collect(Collectors.toList());
 
-        // Strict: only explicit origins
-        configuration.setAllowedOrigins(origins);
-        if (!originPatterns.isEmpty()) {
-            configuration.setAllowedOriginPatterns(originPatterns);
+        // Use exact origins if provided
+        if (!origins.isEmpty()) {
+            cfg.setAllowedOrigins(origins);
         }
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept"));
-        configuration.setAllowCredentials(false);
-        configuration.setMaxAge(3600L);
+        // And optionally allow wildcard patterns (for Netlify previews, etc.)
+        if (!patterns.isEmpty()) {
+            cfg.setAllowedOriginPatterns(patterns);
+        }
+
+        // Let the browser negotiate whatever it needs for preflight
+        cfg.setAllowedMethods(List.of("*"));            // allow GET/POST/PUT/PATCH/DELETE/OPTIONS
+        cfg.setAllowedHeaders(List.of("*"));            // allow all requested headers
+        cfg.setExposedHeaders(List.of("Authorization","Content-Disposition"));
+        cfg.setAllowCredentials(false);                 // keep false if you use Bearer tokens (no cookies)
+        cfg.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/**", cfg);
         return source;
     }
 }
