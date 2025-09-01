@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { setToken, setUserId, setUsername as setUsernameLS, setEmail as setEmailLS } from '../utils/auth';
 
-import { apiFetch } from '../api/api';
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -13,10 +12,16 @@ const Login: React.FC = () => {
     e.preventDefault();
     setError('');
     try {
-      const data = await apiFetch('/api/auth/login', {
+      const res = await fetch('/api/auth/login', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: username.trim(), password })
       });
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg || 'Invalid credentials');
+      }
+      const data = await res.json();
       setToken(data.token);
       localStorage.setItem('roles', JSON.stringify(data.roles));
       if (typeof data.id === 'number') {
