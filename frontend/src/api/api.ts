@@ -7,9 +7,7 @@ export async function apiFetch(url: string, options: RequestInit = {}) {
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     'Content-Type': 'application/json',
   };
-  const base = (process.env.REACT_APP_API_BASE || '').replace(/\/$/, '');
-  const fullUrl = url.startsWith('http') ? url : `${base}${url}`;
-  const res = await fetch(fullUrl, { ...options, headers });
+  const res = await fetch(url, { ...options, headers });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
