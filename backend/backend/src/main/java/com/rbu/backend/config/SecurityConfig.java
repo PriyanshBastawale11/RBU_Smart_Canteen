@@ -17,6 +17,8 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import java.util.Arrays;
 
 @Configuration
 public class SecurityConfig {
@@ -50,6 +52,26 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            .cors(cors -> cors.configurationSource(request -> {
+                CorsConfiguration config = new CorsConfiguration();
+                config.setAllowedOrigins(Arrays.asList(
+                    "https://rbu-smart-canteen.vercel.app",
+                    "http://localhost:3000"
+                ));
+                config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
+                config.setAllowedHeaders(Arrays.asList(
+                    "Origin", "Content-Type", "Accept", "Authorization",
+                    "X-Requested-With", "Access-Control-Allow-Origin",
+                    "Access-Control-Allow-Headers", "Access-Control-Allow-Credentials"
+                ));
+                config.setExposedHeaders(Arrays.asList(
+                    "Authorization", "Content-Type", "Access-Control-Allow-Origin",
+                    "Access-Control-Allow-Headers", "Access-Control-Allow-Credentials"
+                ));
+                config.setAllowCredentials(true);
+                config.setMaxAge(3600L);
+                return config;
+            }))
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
