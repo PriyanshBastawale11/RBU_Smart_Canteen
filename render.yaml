@@ -8,8 +8,8 @@ services:
     env: docker
     plan: free
     rootDir: backend/backend
-    dockerfilePath: backend/backend/Dockerfile
-    dockerContext: backend/backend
+    dockerfilePath: Dockerfile
+    dockerContext: .
     autoDeploy: true
     healthCheckPath: /v3/api-docs
     envVars:
