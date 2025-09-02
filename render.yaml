@@ -13,11 +13,7 @@ services:
     autoDeploy: true
     healthCheckPath: /v3/api-docs
     envVars:
-      - key: SPRING_DATASOURCE_URL
-        fromDatabase:
-          name: rbu-smart-canteen-db
-          property: connectionString
-      - key: JDBC_DATABASE_URL
+      - key: DB_CONNECTION_STRING
         fromDatabase:
           name: rbu-smart-canteen-db
           property: connectionString
