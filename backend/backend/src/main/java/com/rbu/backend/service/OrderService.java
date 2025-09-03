@@ -6,6 +6,7 @@ import com.rbu.backend.FoodItem;
 import com.rbu.backend.FoodItemRepository;
 import com.rbu.backend.User;
 import com.rbu.backend.UserRepository;
+import com.rbu.backend.Coupon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,8 @@ public class OrderService {
     private FoodItemRepository foodItemRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private CouponService couponService;
 
     public List<Order> getOrdersByUser(Long userId) {
         return orderRepository.findByUserId(userId);
@@ -41,6 +44,14 @@ public class OrderService {
         order.setTotalAmount(total);
         order.setStatus("PLACED");
         order.setOrderTime(LocalDateTime.now());
+        
+        // Save order first to get ID
+        order = orderRepository.save(order);
+        
+        // Generate coupon and save code to order
+        Coupon coupon = couponService.generateForOrder(order.getId());
+        order.setCouponCode(coupon.getCode());
+        
         return orderRepository.save(order);
     }
 

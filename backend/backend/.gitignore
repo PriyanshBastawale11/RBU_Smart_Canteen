@@ -34,4 +34,5 @@ build/
 
 node_modules/
 
-application.properties
+.env
+app.properties

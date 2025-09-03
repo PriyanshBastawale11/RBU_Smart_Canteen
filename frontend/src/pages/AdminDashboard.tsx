@@ -18,6 +18,7 @@ interface Order {
   completedTime?: string;
   items: FoodItem[];
   totalAmount: number;
+  couponCode?: string;
 }
 
 interface Analytics {
@@ -123,37 +124,50 @@ const AdminDashboard: React.FC = () => {
           <h2 className="text-2xl font-bold text-blue-700">Menu Management</h2>
           <button onClick={() => setShowNewModal(true)} className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold shadow hover:bg-blue-700">Add New Item</button>
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white rounded-xl shadow">
-            <thead>
-              <tr className="bg-blue-100">
-                <th className="py-2 px-4">Name</th>
-                <th className="py-2 px-4">Category</th>
-                <th className="py-2 px-4">Price</th>
-                <th className="py-2 px-4">Available</th>
-                <th className="py-2 px-4">Prep Time</th>
-                <th className="py-2 px-4">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {menu.map(item => (
-                <tr key={item.id} className="border-b hover:bg-blue-50 transition-all">
-                  <td className="py-2 px-4 font-semibold">{item.name}</td>
-                  <td className="py-2 px-4">{item.category}</td>
-                  <td className="py-2 px-4">₹{item.price}</td>
-                  <td className="py-2 px-4">
-                    <button onClick={() => handleAvailability(item.id, item.available)} className={`px-3 py-1 rounded-full font-semibold ${item.available ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}`}>{item.available ? 'Yes' : 'No'}</button>
-                  </td>
-                  <td className="py-2 px-4">{item.estimatedPrepTime} min</td>
-                  <td className="py-2 px-4 space-x-2">
-                    <button onClick={() => handleEdit(item)} className="bg-yellow-400 text-white px-3 py-1 rounded hover:bg-yellow-500">Edit</button>
-                    <button onClick={() => handleDelete(item.id)} className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Delete</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {/* Group items by category */}
+        {Object.entries(
+          menu.reduce((acc, item) => {
+            const category = item.category || 'Uncategorized';
+            if (!acc[category]) acc[category] = [];
+            acc[category].push(item);
+            return acc;
+          }, {} as Record<string, FoodItem[]>)
+        )
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([category, items]) => (
+            <div key={category} className="mb-6">
+              <h3 className="text-lg font-bold text-blue-600 mb-3 bg-blue-50 p-2 rounded-lg">{category}</h3>
+              <div className="overflow-x-auto">
+                <table className="min-w-full bg-white rounded-xl shadow">
+                  <thead>
+                    <tr className="bg-blue-100">
+                      <th className="py-2 px-4 text-left">Name</th>
+                      <th className="py-2 px-4 text-left">Price</th>
+                      <th className="py-2 px-4 text-center">Available</th>
+                      <th className="py-2 px-4 text-center">Prep Time</th>
+                      <th className="py-2 px-4 text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {items.map(item => (
+                      <tr key={item.id} className="border-b hover:bg-blue-50 transition-all">
+                        <td className="py-2 px-4 font-semibold">{item.name}</td>
+                        <td className="py-2 px-4">₹{item.price}</td>
+                        <td className="py-2 px-4 text-center">
+                          <button onClick={() => handleAvailability(item.id, item.available)} className={`px-3 py-1 rounded-full font-semibold ${item.available ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}`}>{item.available ? 'Yes' : 'No'}</button>
+                        </td>
+                        <td className="py-2 px-4 text-center">{item.estimatedPrepTime} min</td>
+                        <td className="py-2 px-4 space-x-2 text-center">
+                          <button onClick={() => handleEdit(item)} className="bg-yellow-400 text-white px-3 py-1 rounded hover:bg-yellow-500">Edit</button>
+                          <button onClick={() => handleDelete(item.id)} className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Delete</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ))}
       </div>
       {/* Edit Modal */}
       {showEditModal && editItem && (
@@ -186,32 +200,123 @@ const AdminDashboard: React.FC = () => {
       {/* Order Management */}
       <div className={`${activeTab === 'orders' ? '' : 'hidden'} mb-10`}>
         <h2 className="text-2xl font-bold text-blue-700 mb-4">Order Management</h2>
-        <div className="space-y-4">
-          {orders.length === 0 && <div className="text-gray-500">No orders yet.</div>}
-          {orders.map(order => (
-            <div key={order.id} className="bg-white rounded-lg shadow p-4 flex flex-col md:flex-row md:items-center md:justify-between">
-              <div>
-                <div className="font-semibold">Order #{order.id}</div>
-                <div className="text-gray-600 text-sm">Status: <span className="font-bold text-blue-700">{order.status}</span></div>
-                <div className="text-gray-500 text-sm">Placed: {new Date(order.orderTime).toLocaleString()}</div>
-                {order.completedTime && <div className="text-gray-500 text-sm">Completed: {new Date(order.completedTime).toLocaleString()}</div>}
-                <div className="text-gray-700 text-sm">Items: {order.items.map(i => i.name).join(', ')}</div>
-                <div className="text-gray-800 font-bold">Total: ₹{order.totalAmount}</div>
+        {(() => {
+          // Group orders by IST date key and keep a label for display
+          const ordersByDate = orders.reduce((acc, order) => {
+            const d = new Date(order.orderTime);
+            const key = d.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }); // YYYY-MM-DD
+            if (!acc[key]) acc[key] = [];
+            acc[key].push(order);
+            return acc;
+          }, {} as Record<string, Order[]>);
+
+          const dateLabels = Object.keys(ordersByDate).reduce((labels, key) => {
+            const anyOrder = ordersByDate[key][0];
+            const d = new Date(anyOrder.orderTime);
+            labels[key] = d.toLocaleDateString('en-IN', {
+              timeZone: 'Asia/Kolkata',
+              weekday: 'short',
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
+            });
+            return labels;
+          }, {} as Record<string, string>);
+
+          // Sort keys (YYYY-MM-DD) in descending order (most recent first)
+          const sortedDates = Object.keys(ordersByDate).sort((a, b) => b.localeCompare(a));
+
+          if (sortedDates.length === 0) {
+            return <div className="text-gray-500">No orders yet.</div>;
+          }
+
+          return sortedDates.map(dateKey => {
+            const dayOrders = ordersByDate[dateKey].sort((a, b) => 
+              new Date(b.orderTime).getTime() - new Date(a.orderTime).getTime()
+            );
+            
+            return (
+              <div key={dateKey} className="mb-8">
+                <h3 className="text-lg font-bold text-blue-600 mb-3 bg-blue-50 p-2 rounded-lg sticky top-0 z-10">
+                  {dateLabels[dateKey]} ({dayOrders.length} orders)
+                </h3>
+                <div className="space-y-4">
+                  {dayOrders.map((order, index) => {
+                    const orderDate = new Date(order.orderTime);
+                    const timeString = orderDate.toLocaleTimeString('en-IN', {
+                      timeZone: 'Asia/Kolkata',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: true
+                    });
+                    const dayOrderNumber = dayOrders.length - index;
+                    
+                    return (
+                      <div key={order.id} className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-4">
+                        <div className="flex flex-col md:flex-row md:items-start md:justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="font-bold text-lg">Order #{dayOrderNumber}</span>
+                              <span className="text-xs text-gray-500">(ID: {order.id})</span>
+                            </div>
+                            {order.couponCode && (
+                              <div className="bg-green-50 text-green-700 px-3 py-1 rounded-lg mb-2 inline-block">
+                                <span className="font-semibold">Coupon: {order.couponCode}</span>
+                              </div>
+                            )}
+                            <div className="text-gray-600 text-sm mb-1">
+                              <span className="font-semibold">Status:</span> 
+                              <span className={`ml-2 px-2 py-1 rounded text-xs font-semibold ${order.status === 'COMPLETED' ? 'bg-green-100 text-green-800' : order.status === 'CANCELLED' ? 'bg-red-100 text-red-800' : order.status === 'PREPARING' ? 'bg-yellow-100 text-yellow-800' : order.status === 'READY' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
+                                {order.status}
+                              </span>
+                            </div>
+                            <div className="text-gray-600 text-sm mb-1">
+                              <span className="font-semibold">Placed at:</span> {timeString}
+                            </div>
+                            <div className="text-gray-700 text-sm mb-1">
+                              <span className="font-semibold">Items:</span> {order.items.map(i => i.name).join(', ')}
+                            </div>
+                            <div className="text-gray-800 font-bold mt-2">
+                              Total: ₹{order.totalAmount}
+                            </div>
+                          </div>
+                          <div className="mt-3 md:mt-0 flex flex-wrap gap-2 justify-end">
+                            {order.status !== 'COMPLETED' && order.status !== 'CANCELLED' && (
+                              <>
+                                {order.status === 'PLACED' && (
+                                  <button onClick={() => handleOrderStatus(order.id, 'PREPARING')} 
+                                    className="bg-yellow-400 text-white px-4 py-2 rounded-lg hover:bg-yellow-500 text-sm font-semibold">
+                                    Start Preparing
+                                  </button>
+                                )}
+                                {order.status === 'PREPARING' && (
+                                  <button onClick={() => handleOrderStatus(order.id, 'READY')} 
+                                    className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 text-sm font-semibold">
+                                    Mark Ready
+                                  </button>
+                                )}
+                                {(order.status === 'READY' || order.status === 'PREPARING') && (
+                                  <button onClick={() => handleOrderStatus(order.id, 'COMPLETED')} 
+                                    className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 text-sm font-semibold">
+                                    Complete Order
+                                  </button>
+                                )}
+                                <button onClick={() => handleOrderStatus(order.id, 'CANCELLED')} 
+                                  className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 text-sm font-semibold">
+                                  Cancel
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="mt-2 md:mt-0 flex flex-col gap-2 items-end">
-                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${order.status === 'COMPLETED' ? 'bg-green-200 text-green-800' : order.status === 'CANCELLED' ? 'bg-red-200 text-red-800' : 'bg-yellow-100 text-yellow-800'}`}>{order.status}</span>
-                {order.status !== 'COMPLETED' && order.status !== 'CANCELLED' && (
-                  <>
-                    <button onClick={() => handleOrderStatus(order.id, 'PREPARING')} className="bg-yellow-400 text-white px-3 py-1 rounded hover:bg-yellow-500">Preparing</button>
-                    <button onClick={() => handleOrderStatus(order.id, 'READY')} className="bg-blue-400 text-white px-3 py-1 rounded hover:bg-blue-500">Ready</button>
-                    <button onClick={() => handleOrderStatus(order.id, 'COMPLETED')} className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">Complete</button>
-                    <button onClick={() => handleOrderStatus(order.id, 'CANCELLED')} className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Cancel</button>
-                  </>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+            );
+          });
+        })()}
       </div>
       {/* Analytics Panel */}
       <div className={`mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 ${activeTab === 'analytics' ? '' : 'hidden'}`}>

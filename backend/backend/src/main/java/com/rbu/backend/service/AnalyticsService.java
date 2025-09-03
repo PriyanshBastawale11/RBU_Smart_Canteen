@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -17,6 +19,8 @@ public class AnalyticsService {
     private FoodItemRepository foodItemRepository;
     @Autowired
     private OrderRepository orderRepository;
+    
+    private static final ZoneId IST = ZoneId.of("Asia/Kolkata");
 
     public List<FoodItem> getBestsellers(int limit) {
         // Compute real-time counts based on actual orders (exclude CANCELLED)
@@ -57,20 +61,32 @@ public class AnalyticsService {
     }
 
     public Map<String, Long> getPeakHours() {
-        // Group completed orders by hour
+        // Group completed orders by hour in IST for the last 7 days (rolling window)
+        LocalDate threshold = LocalDate.now(IST).minusDays(6);
         List<Order> completedOrders = orderRepository.findAll().stream()
                 .filter(o -> o.getStatus().equals("COMPLETED") && o.getCompletedTime() != null)
-                .collect(Collectors.toList());
+                .filter(o -> {
+                    ZonedDateTime zdt = o.getOrderTime()
+                            .atZone(ZoneId.systemDefault())
+                            .withZoneSameInstant(IST);
+                    return !zdt.toLocalDate().isBefore(threshold);
+                })
+                .toList();
         Map<String, Long> hourCounts = completedOrders.stream()
                 .collect(Collectors.groupingBy(
-                        o -> String.format("%02d:00", o.getOrderTime().getHour()),
+                        o -> {
+                            ZonedDateTime zdt = o.getOrderTime()
+                                    .atZone(ZoneId.systemDefault())
+                                    .withZoneSameInstant(IST);
+                            return String.format("%02d:00", zdt.getHour());
+                        },
                         Collectors.counting()
                 ));
         return hourCounts;
     }
 
     public Map<String, Long> getDailyOrders(int days) {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(IST);
         Map<String, Long> result = new LinkedHashMap<>();
         for (int i = days - 1; i >= 0; i--) {
             LocalDate d = today.minusDays(i);
@@ -79,7 +95,10 @@ public class AnalyticsService {
         orderRepository.findAll().stream()
                 .filter(o -> o.getOrderTime() != null)
                 .forEach(o -> {
-                    String key = o.getOrderTime().toLocalDate().toString();
+                    ZonedDateTime zdt = o.getOrderTime()
+                            .atZone(ZoneId.systemDefault())
+                            .withZoneSameInstant(IST);
+                    String key = zdt.toLocalDate().toString();
                     if (result.containsKey(key)) {
                         result.put(key, result.get(key) + 1);
                     }
@@ -88,7 +107,7 @@ public class AnalyticsService {
     }
 
     public Map<String, Double> getRevenueTrend(int days) {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(IST);
         Map<String, Double> result = new LinkedHashMap<>();
         for (int i = days - 1; i >= 0; i--) {
             LocalDate d = today.minusDays(i);
@@ -97,7 +116,10 @@ public class AnalyticsService {
         orderRepository.findAll().stream()
                 .filter(o -> o.getCompletedTime() != null && "COMPLETED".equals(o.getStatus()))
                 .forEach(o -> {
-                    String key = o.getCompletedTime().toLocalDate().toString();
+                    ZonedDateTime zdt = o.getCompletedTime()
+                            .atZone(ZoneId.systemDefault())
+                            .withZoneSameInstant(IST);
+                    String key = zdt.toLocalDate().toString();
                     if (result.containsKey(key)) {
                         result.put(key, result.get(key) + o.getTotalAmount());
                     }

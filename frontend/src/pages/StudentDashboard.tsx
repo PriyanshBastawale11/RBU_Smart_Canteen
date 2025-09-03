@@ -21,6 +21,7 @@ interface Order {
   completedTime?: string;
   items: FoodItem[];
   totalAmount: number;
+  couponCode?: string;
 }
 
 const StudentDashboard: React.FC = () => {
@@ -381,8 +382,11 @@ const StudentDashboard: React.FC = () => {
               <div>
                 <div className="font-semibold">Order #{order.id}</div>
                 <div className="text-gray-600 text-sm">Status: <span className="font-bold text-green-700">{order.status}</span></div>
-                <div className="text-gray-500 text-sm">Placed: {new Date(order.orderTime).toLocaleString()}</div>
-                {order.completedTime && <div className="text-gray-500 text-sm">Completed: {new Date(order.completedTime).toLocaleString()}</div>}
+                <div className="text-gray-600 text-sm">Placed: {new Date(order.orderTime).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</div>
+                {order.completedTime && <div className="text-gray-500 text-sm">Completed: {new Date(order.completedTime).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</div>}
+                {order.couponCode && (
+                  <div className="mt-1 inline-block bg-green-50 text-green-700 px-2 py-0.5 rounded text-xs font-semibold">Coupon: {order.couponCode}</div>
+                )}
                 <div className="text-gray-700 text-sm">Items: {order.items.map(i => i.name).join(', ')}</div>
                 <div className="text-gray-800 font-bold">Total: ₹{order.totalAmount}</div>
                 {(order.status === 'PLACED' || order.status === 'PREPARING') && (

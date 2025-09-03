@@ -35,6 +35,9 @@ public class Order {
     private LocalDateTime orderTime;
 
     private LocalDateTime completedTime;
+    
+    @Column
+    private String couponCode;
 
     // Getters and setters
     public Long getId() { return id; }
@@ -51,4 +54,6 @@ public class Order {
     public void setOrderTime(LocalDateTime orderTime) { this.orderTime = orderTime; }
     public LocalDateTime getCompletedTime() { return completedTime; }
     public void setCompletedTime(LocalDateTime completedTime) { this.completedTime = completedTime; }
+    public String getCouponCode() { return couponCode; }
+    public void setCouponCode(String couponCode) { this.couponCode = couponCode; }
 }
