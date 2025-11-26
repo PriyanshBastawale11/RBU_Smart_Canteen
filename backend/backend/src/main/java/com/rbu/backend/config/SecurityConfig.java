@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import java.util.Arrays;
 
 @Configuration
@@ -75,7 +76,7 @@ public class SecurityConfig {
                 config.setMaxAge(3600L);
                 return config;
             }))
-            .csrf(csrf -> csrf.disable())
+            .csrf(csrf -> csrf.ignoringRequestMatchers(new AntPathRequestMatcher("/api/**")))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 // Public (no auth) endpoints
@@ -99,6 +100,11 @@ public class SecurityConfig {
                 // Recommendations, analytics, payments, coupons accessible to any authenticated user
                 .requestMatchers("/api/recommendations/**").authenticated()
                 .requestMatchers("/api/analytics/**").authenticated()
+                // Preflight across the app
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // Allow Razorpay order create/verify without auth (adjust to authenticated() if you require login)
+                .requestMatchers(HttpMethod.POST, "/api/payments/razorpay/order", "/api/payments/razorpay/verify").permitAll()
+                // The rest of payments require auth
                 .requestMatchers("/api/payments/**").authenticated()
                 .requestMatchers("/api/coupons/**").authenticated()
 
