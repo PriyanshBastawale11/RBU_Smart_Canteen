@@ -70,6 +70,19 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
+    public Order cancelOwnOrder(Long orderId, String username) {
+        Order order = orderRepository.findById(orderId).orElseThrow();
+        if (order.getUser() == null || order.getUser().getUsername() == null || !order.getUser().getUsername().equals(username)) {
+            throw new RuntimeException("Unauthorized to cancel this order");
+        }
+        if (!"PLACED".equals(order.getStatus())) {
+            throw new RuntimeException("Only PLACED orders can be cancelled");
+        }
+        order.setStatus("CANCELLED");
+        order.setCompletedTime(LocalDateTime.now());
+        return orderRepository.save(order);
+    }
+
     public long getEstimatedWaitTime(Long orderId) {
         Optional<Order> targetOpt = orderRepository.findById(orderId);
         if (targetOpt.isEmpty()) return 0L;

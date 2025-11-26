@@ -5,6 +5,7 @@ import com.rbu.backend.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,12 @@ public class OrderController {
     @PutMapping("/{orderId}/status")
     public Order updateOrderStatus(@PathVariable Long orderId, @RequestParam String status) {
         return orderService.updateOrderStatus(orderId, status);
+    }
+
+    @PutMapping("/{orderId}/cancel")
+    public ResponseEntity<Order> cancelOwn(@PathVariable Long orderId, Authentication auth) {
+        String username = auth.getName();
+        return ResponseEntity.ok(orderService.cancelOwnOrder(orderId, username));
     }
 
     @GetMapping

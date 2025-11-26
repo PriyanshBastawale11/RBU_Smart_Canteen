@@ -51,6 +51,7 @@ const StudentDashboard: React.FC = () => {
   const prevStatusesRef = useRef<Map<number, string>>(new Map());
   const lastQueueRef = useRef<number | null>(null);
   const [activeTab, setActiveTab] = useState<'menu' | 'orders' | 'analytics'>('menu');
+  const [prevOpen, setPrevOpen] = useState(false);
 
   // User display info
   const usernameLS = getUsername();
@@ -221,46 +222,93 @@ const StudentDashboard: React.FC = () => {
     setPayingOrderId(orderId);
     setPayStatus('');
     try {
-      // Placeholder for real Razorpay integration
-      // Here you would open Razorpay modal and handle payment
-      const resp = await apiFetch('/api/payments', {
-        method: 'POST',
-        body: JSON.stringify({ orderId, method: 'MOCK' })
+      const ensureRazorpay = () => new Promise<void>((resolve, reject) => {
+        const w = window as any;
+        if (w.Razorpay) return resolve();
+        const s = document.createElement('script');
+        s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        s.onload = () => resolve();
+        s.onerror = () => reject(new Error('Failed to load Razorpay SDK'));
+        document.body.appendChild(s);
       });
-      if (resp.paymentStatus === 'SUCCESS') {
-        setPayStatus('Payment successful!');
-        setNotification({ message: 'Payment successful!', type: 'success' });
-        setCouponData({
-          code: resp.couponCode,
-          orderId: resp.orderId,
-          transactionId: resp.transactionId,
-          amount: resp.orderSummary?.totalAmount,
-        });
-        setShowCouponModal(true);
-      } else {
+      await ensureRazorpay();
+
+      const pre = await apiFetch('/api/payments/razorpay/order', {
+        method: 'POST',
+        body: JSON.stringify({ orderId })
+      });
+
+      const w = window as any;
+      const rzp = new w.Razorpay({
+        key: pre.keyId,
+        amount: pre.amount,
+        currency: pre.currency,
+        name: 'RBU Smart Canteen',
+        description: `Order #${orderId}`,
+        order_id: pre.razorpayOrderId,
+        prefill: { name: displayName, email: displayEmail },
+        theme: { color: '#16a34a' },
+        handler: async (response: any) => {
+          try {
+            const verify = await apiFetch('/api/payments/razorpay/verify', {
+              method: 'POST',
+              body: JSON.stringify({
+                orderId,
+                razorpayOrderId: response.razorpay_order_id,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+              })
+            });
+            if (verify.paymentStatus === 'SUCCESS') {
+              setPayStatus('Payment successful!');
+              setNotification({ message: 'Payment successful!', type: 'success' });
+              setCouponData({
+                code: verify.couponCode,
+                orderId: verify.orderId,
+                transactionId: verify.transactionId,
+                amount: verify.orderSummary?.totalAmount,
+              });
+              setShowCouponModal(true);
+            } else {
+              setPayStatus('Payment failed!');
+              setNotification({ message: 'Payment verification failed!', type: 'error' });
+            }
+            const uid = getUserId();
+            if (uid) apiFetch(`/api/orders/user/${uid}`).then(setOrders);
+          } catch (err: any) {
+            setNotification({ message: err?.message || 'Payment verification failed!', type: 'error' });
+          } finally {
+            setPayingOrderId(null);
+            setTimeout(() => setPayStatus(''), 2000);
+          }
+        },
+      });
+
+      rzp.on('payment.failed', (resp: any) => {
         setPayStatus('Payment failed!');
-        setNotification({ message: 'Payment failed!', type: 'error' });
-      }
-      setTimeout(() => setPayStatus(''), 2000);
-      const uid = getUserId();
-      if (uid) apiFetch(`/api/orders/user/${uid}`).then(setOrders);
+        setNotification({ message: resp?.error?.description || 'Payment failed!', type: 'error' });
+        setPayingOrderId(null);
+        setTimeout(() => setPayStatus(''), 2000);
+      });
+
+      rzp.open();
     } catch (e: any) {
       setPayStatus('Payment failed!');
       setNotification({ message: e?.message || 'Payment failed!', type: 'error' });
+      setPayingOrderId(null);
       setTimeout(() => setPayStatus(''), 2000);
     }
-    setPayingOrderId(null);
   };
 
   const handleCancel = async (orderId: number) => {
     setCancellingOrderId(orderId);
     try {
-      await apiFetch(`/api/orders/${orderId}/status?status=CANCELLED`, { method: 'PUT' });
+      await apiFetch(`/api/orders/${orderId}/cancel`, { method: 'PUT' });
       setNotification({ message: 'Order cancelled.', type: 'info' });
       const uid = getUserId();
       if (uid) apiFetch(`/api/orders/user/${uid}`).then(setOrders);
-    } catch {
-      setNotification({ message: 'Failed to cancel order.', type: 'error' });
+    } catch (e: any) {
+      setNotification({ message: e?.message || 'Failed to cancel order.', type: 'error' });
     }
     setCancellingOrderId(null);
   };
@@ -340,7 +388,7 @@ const StudentDashboard: React.FC = () => {
         </div>
       </div>
       <div className={`${activeTab === 'menu' ? '' : 'hidden'} grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10 transition-all duration-300`}>
-        {filteredMenu.map(item => (
+        {Array.from(new Map(filteredMenu.map(i => [i.id, i])).values()).map(item => (
           <MenuCard key={item.id} {...item} onOrder={handleOrder} onAddToCombo={handleAddToCombo} />
         ))}
       </div>
@@ -376,10 +424,13 @@ const StudentDashboard: React.FC = () => {
       {/* Order Tracking */}
       <div className={`mt-10 ${activeTab === 'orders' ? '' : 'hidden'}`}>
         <h2 className="text-2xl font-bold mb-4 text-green-700">Your Orders</h2>
-        <div className="space-y-4">
-          {orders.length === 0 && <div className="text-gray-500">No orders yet.</div>}
-          {orders.map(order => (
-            <div key={order.id} className="bg-white/90 rounded-xl shadow-lg p-4 border-l-4 border-green-300/70 hover:shadow-xl flex flex-col md:flex-row md:items-center md:justify-between transition-all duration-200">
+        {(() => {
+          if (orders.length === 0) return <div className="text-gray-500">No orders yet.</div>;
+          const sorted = [...orders].sort((a, b) => new Date(b.orderTime).getTime() - new Date(a.orderTime).getTime());
+          const current = sorted.find(o => o.status === 'PLACED' || o.status === 'PREPARING' || o.status === 'READY');
+          const prev = sorted.filter(o => o !== current);
+          const Card = ({ order }: { order: Order }) => (
+            <div className="bg-white/90 rounded-xl shadow-lg p-4 border-l-4 border-green-300/70 hover:shadow-xl flex flex-col md:flex-row md:items-center md:justify-between transition-all duration-200">
               <div>
                 <div className="font-semibold">Order #{order.id}</div>
                 <div className="text-gray-600 text-sm">Status: <span className="font-bold text-green-700">{order.status}</span></div>
@@ -398,18 +449,10 @@ const StudentDashboard: React.FC = () => {
                 <span className={`px-3 py-1 rounded-full text-xs font-semibold ${order.status === 'COMPLETED' ? 'bg-green-200 text-green-800' : order.status === 'CANCELLED' ? 'bg-red-200 text-red-800' : 'bg-yellow-100 text-yellow-800'}`}>{order.status}</span>
                 {order.status === 'PLACED' && (
                   <>
-                    <button
-                      onClick={() => handlePay(order.id)}
-                      disabled={payingOrderId === order.id}
-                      className="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-4 py-1 rounded-lg font-semibold shadow hover:from-blue-600 hover:to-blue-800 transition-all disabled:bg-gray-300 disabled:cursor-not-allowed"
-                    >
+                    <button onClick={() => handlePay(order.id)} disabled={payingOrderId === order.id} className="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-4 py-1 rounded-lg font-semibold shadow hover:from-blue-600 hover:to-blue-800 transition-all disabled:bg-gray-300 disabled:cursor-not-allowed">
                       {payingOrderId === order.id ? 'Paying...' : 'Pay Now'}
                     </button>
-                    <button
-                      onClick={() => handleCancel(order.id)}
-                      disabled={cancellingOrderId === order.id}
-                      className="bg-gradient-to-r from-red-400 to-red-600 text-white px-4 py-1 rounded-lg font-semibold shadow hover:from-red-500 hover:to-red-700 transition-all disabled:bg-gray-300 disabled:cursor-not-allowed"
-                    >
+                    <button onClick={() => handleCancel(order.id)} disabled={cancellingOrderId === order.id} className="bg-gradient-to-r from-red-400 to-red-600 text-white px-4 py-1 rounded-lg font-semibold shadow hover:from-red-500 hover:to-red-700 transition-all disabled:bg-gray-300 disabled:cursor-not-allowed">
                       {cancellingOrderId === order.id ? 'Cancelling...' : 'Cancel'}
                     </button>
                   </>
@@ -417,8 +460,27 @@ const StudentDashboard: React.FC = () => {
                 {payStatus && payingOrderId === order.id && <div className="text-green-700 text-xs mt-1">{payStatus}</div>}
               </div>
             </div>
-          ))}
-        </div>
+          );
+          return (
+            <div className="space-y-4">
+              {current && (
+                <div>
+                  <div className="text-sm text-gray-500 mb-2">Current Order</div>
+                  <Card order={current} />
+                </div>
+              )}
+              <div className="bg-white/80 rounded-xl shadow p-4">
+                <button onClick={() => setPrevOpen(v => !v)} className="w-full flex justify-between items-center">
+                  <span className="font-semibold text-gray-800">Previous Orders</span>
+                  <span className="text-sm text-gray-500">{prev.length}</span>
+                </button>
+                <div className={`${prevOpen ? 'mt-3 space-y-3' : 'hidden'}`}>
+                  {prev.map(o => <Card key={o.id} order={o} />)}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </div>
       {/* Analytics Panel */}
       <div className={`mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 ${activeTab === 'analytics' ? '' : 'hidden'}`}>
