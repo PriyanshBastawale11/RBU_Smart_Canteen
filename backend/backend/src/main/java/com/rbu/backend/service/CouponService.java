@@ -1,9 +1,10 @@
 package com.rbu.backend.service;
 
-import com.rbu.backend.Coupon;
-import com.rbu.backend.CouponRepository;
-import com.rbu.backend.Order;
-import com.rbu.backend.OrderRepository;
+import com.rbu.backend.Entities.Coupon;
+import com.rbu.backend.Entities.Order;
+import com.rbu.backend.Repository.CouponRepository;
+import com.rbu.backend.Repository.OrderRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

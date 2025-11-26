@@ -1,6 +1,6 @@
 package com.rbu.backend.controller;
 
-import com.rbu.backend.Coupon;
+import com.rbu.backend.Entities.Coupon;
 import com.rbu.backend.service.CouponService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

@@ -1,9 +1,9 @@
 package com.rbu.backend.service;
 
-import com.rbu.backend.Payment;
-import com.rbu.backend.PaymentRepository;
-import com.rbu.backend.Order;
-import com.rbu.backend.OrderRepository;
+import com.rbu.backend.Entities.Order;
+import com.rbu.backend.Entities.Payment;
+import com.rbu.backend.Repository.OrderRepository;
+import com.rbu.backend.Repository.PaymentRepository;
 import com.rbu.backend.service.CouponService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,7 +39,7 @@ public class PaymentService {
             payment.setPaymentStatus("FAILED");
         }
         return paymentRepository.save(payment);
-    }
+     }
 
     public Optional<Payment> getPaymentByOrderId(Long orderId) {
         return Optional.ofNullable(paymentRepository.findByOrderId(orderId));

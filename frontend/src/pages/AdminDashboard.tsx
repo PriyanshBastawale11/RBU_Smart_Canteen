@@ -111,18 +111,19 @@ const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-extrabold mb-6 text-blue-800">Admin/Canteen Staff Dashboard</h1>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-indigo-50">
+      <div className="p-6 max-w-7xl mx-auto">
+      <h1 className="text-4xl md:text-5xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">Admin/Canteen Staff Dashboard</h1>
       <div className="mb-4 flex gap-2">
-        <button onClick={() => setActiveTab('menu')} className={`px-4 py-2 rounded-full font-semibold ${activeTab === 'menu' ? 'bg-blue-700 text-white' : 'bg-gray-200'}`}>Menu</button>
-        <button onClick={() => setActiveTab('orders')} className={`px-4 py-2 rounded-full font-semibold ${activeTab === 'orders' ? 'bg-blue-700 text-white' : 'bg-gray-200'}`}>Orders</button>
-        <button onClick={() => setActiveTab('analytics')} className={`px-4 py-2 rounded-full font-semibold ${activeTab === 'analytics' ? 'bg-blue-700 text-white' : 'bg-gray-200'}`}>Analytics</button>
+        <button onClick={() => setActiveTab('menu')} className={`px-4 py-2 rounded-full font-semibold transition-all ${activeTab === 'menu' ? 'bg-gradient-to-r from-green-600 to-blue-600 text-white shadow' : 'bg-white/80 hover:bg-white text-gray-700 shadow-sm'}`}>Menu</button>
+        <button onClick={() => setActiveTab('orders')} className={`px-4 py-2 rounded-full font-semibold transition-all ${activeTab === 'orders' ? 'bg-gradient-to-r from-green-600 to-blue-600 text-white shadow' : 'bg-white/80 hover:bg-white text-gray-700 shadow-sm'}`}>Orders</button>
+        <button onClick={() => setActiveTab('analytics')} className={`px-4 py-2 rounded-full font-semibold transition-all ${activeTab === 'analytics' ? 'bg-gradient-to-r from-green-600 to-blue-600 text-white shadow' : 'bg-white/80 hover:bg-white text-gray-700 shadow-sm'}`}>Analytics</button>
       </div>
       {/* Menu Management */}
       <div className={`${activeTab === 'menu' ? '' : 'hidden'} mb-10`}>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-blue-700">Menu Management</h2>
-          <button onClick={() => setShowNewModal(true)} className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold shadow hover:bg-blue-700">Add New Item</button>
+          <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">Menu Management</h2>
+          <button onClick={() => setShowNewModal(true)} className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-4 py-2 rounded-lg font-semibold shadow hover:from-green-700 hover:to-blue-700">Add New Item</button>
         </div>
         {/* Group items by category */}
         {Object.entries(
@@ -136,11 +137,11 @@ const AdminDashboard: React.FC = () => {
           .sort(([a], [b]) => a.localeCompare(b))
           .map(([category, items]) => (
             <div key={category} className="mb-6">
-              <h3 className="text-lg font-bold text-blue-600 mb-3 bg-blue-50 p-2 rounded-lg">{category}</h3>
+              <h3 className="text-lg font-bold text-blue-700 mb-3 bg-white/80 backdrop-blur p-2 rounded-lg shadow-sm">{category}</h3>
               <div className="overflow-x-auto">
                 <table className="min-w-full bg-white rounded-xl shadow">
                   <thead>
-                    <tr className="bg-blue-100">
+                    <tr className="bg-blue-100/70">
                       <th className="py-2 px-4 text-left">Name</th>
                       <th className="py-2 px-4 text-left">Price</th>
                       <th className="py-2 px-4 text-center">Available</th>
@@ -171,8 +172,8 @@ const AdminDashboard: React.FC = () => {
       </div>
       {/* Edit Modal */}
       {showEditModal && editItem && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-8 shadow-2xl w-96 relative">
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 transition-all duration-200">
+          <div className="bg-white rounded-xl p-8 shadow-2xl w-96 relative animate-fadeIn">
             <button className="absolute top-2 right-2 text-gray-400 hover:text-red-600 text-2xl" onClick={() => setShowEditModal(false)}>&times;</button>
             <h2 className="text-xl font-bold mb-2">Edit Item</h2>
             <input className="w-full border rounded px-3 py-2 mb-2" value={editItem.name} onChange={e => setEditItem({ ...editItem, name: e.target.value } as FoodItem)} placeholder="Name" />
@@ -252,7 +253,7 @@ const AdminDashboard: React.FC = () => {
                     const dayOrderNumber = dayOrders.length - index;
                     
                     return (
-                      <div key={order.id} className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-4">
+                      <div key={order.id} className="bg-white/90 rounded-xl shadow-lg border-l-4 border-blue-300/70 hover:shadow-xl transition-all p-4">
                         <div className="flex flex-col md:flex-row md:items-start md:justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
@@ -375,6 +376,7 @@ const AdminDashboard: React.FC = () => {
             </div>
           ) : <div className="text-gray-500 text-sm">No data</div>}
         </div>
+      </div>
       </div>
     </div>
   );

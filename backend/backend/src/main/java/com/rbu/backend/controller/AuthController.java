@@ -1,10 +1,10 @@
 package com.rbu.backend.controller;
 
-import com.rbu.backend.User;
-import com.rbu.backend.UserRepository;
+import com.rbu.backend.Entities.OtpToken;
+import com.rbu.backend.Entities.User;
+import com.rbu.backend.Repository.OtpTokenRepository;
+import com.rbu.backend.Repository.UserRepository;
 import com.rbu.backend.util.JwtUtil;
-import com.rbu.backend.OtpToken;
-import com.rbu.backend.OtpTokenRepository;
 import com.rbu.backend.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

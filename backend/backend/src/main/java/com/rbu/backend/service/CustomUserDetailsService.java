@@ -1,7 +1,8 @@
 package com.rbu.backend.service;
 
-import com.rbu.backend.User;
-import com.rbu.backend.UserRepository;
+import com.rbu.backend.Entities.User;
+import com.rbu.backend.Repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

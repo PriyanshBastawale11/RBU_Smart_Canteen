@@ -1,6 +1,7 @@
-package com.rbu.backend;
+package com.rbu.backend.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;

@@ -1,8 +1,11 @@
-package com.rbu.backend;
+package com.rbu.backend.Repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.rbu.backend.Entities.OtpToken;
+
 import java.util.Optional;
 
 public interface OtpTokenRepository extends JpaRepository<OtpToken, Long> {

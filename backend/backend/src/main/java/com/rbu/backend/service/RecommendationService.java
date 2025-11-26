@@ -1,9 +1,10 @@
 package com.rbu.backend.service;
 
-import com.rbu.backend.FoodItem;
-import com.rbu.backend.FoodItemRepository;
-import com.rbu.backend.Order;
-import com.rbu.backend.OrderRepository;
+import com.rbu.backend.Entities.FoodItem;
+import com.rbu.backend.Entities.Order;
+import com.rbu.backend.Repository.FoodItemRepository;
+import com.rbu.backend.Repository.OrderRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

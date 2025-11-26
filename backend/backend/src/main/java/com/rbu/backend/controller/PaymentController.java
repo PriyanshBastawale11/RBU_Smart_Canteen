@@ -1,11 +1,12 @@
 package com.rbu.backend.controller;
 
-import com.rbu.backend.Payment;
-import com.rbu.backend.Coupon;
-import com.rbu.backend.Order;
+import com.rbu.backend.Entities.Coupon;
+import com.rbu.backend.Entities.Order;
+import com.rbu.backend.Entities.Payment;
+import com.rbu.backend.Repository.OrderRepository;
 import com.rbu.backend.service.PaymentService;
 import com.rbu.backend.service.CouponService;
-import com.rbu.backend.OrderRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

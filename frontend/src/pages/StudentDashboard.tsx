@@ -266,21 +266,22 @@ const StudentDashboard: React.FC = () => {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-indigo-50">
+      <div className="p-6 max-w-7xl mx-auto">
       {notification && <Notification message={notification.message} type={notification.type} onClose={() => setNotification(null)} />}
       {/* User Profile Section */}
-      <div className="flex items-center gap-4 mb-8">
+      <div className="flex items-center gap-4 mb-8 bg-white/80 backdrop-blur rounded-2xl shadow-lg p-4">
         <div className="w-14 h-14 rounded-full bg-green-200 flex items-center justify-center text-2xl font-bold text-green-800">{initial || 'U'}</div>
         <div>
           <div className="font-bold text-lg text-green-900">{displayName}</div>
           {displayEmail && <div className="text-gray-500 text-sm">{displayEmail}</div>}
         </div>
       </div>
-      <h1 className="text-3xl font-extrabold mb-6 text-green-800">Welcome to RBU Smart Canteen</h1>
+      <h1 className="text-4xl md:text-5xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">Welcome to RBU Smart Canteen</h1>
       <div className="mb-4 flex gap-2">
-        <button onClick={() => setActiveTab('menu')} className={`px-4 py-2 rounded-full font-semibold ${activeTab === 'menu' ? 'bg-green-700 text-white' : 'bg-gray-200'}`}>Menu</button>
-        <button onClick={() => setActiveTab('orders')} className={`px-4 py-2 rounded-full font-semibold ${activeTab === 'orders' ? 'bg-green-700 text-white' : 'bg-gray-200'}`}>Orders</button>
-        <button onClick={() => setActiveTab('analytics')} className={`px-4 py-2 rounded-full font-semibold ${activeTab === 'analytics' ? 'bg-green-700 text-white' : 'bg-gray-200'}`}>Analytics</button>
+        <button onClick={() => setActiveTab('menu')} className={`px-4 py-2 rounded-full font-semibold transition-all ${activeTab === 'menu' ? 'bg-gradient-to-r from-green-600 to-blue-600 text-white shadow' : 'bg-white/80 hover:bg-white text-gray-700 shadow-sm'}`}>Menu</button>
+        <button onClick={() => setActiveTab('orders')} className={`px-4 py-2 rounded-full font-semibold transition-all ${activeTab === 'orders' ? 'bg-gradient-to-r from-green-600 to-blue-600 text-white shadow' : 'bg-white/80 hover:bg-white text-gray-700 shadow-sm'}`}>Orders</button>
+        <button onClick={() => setActiveTab('analytics')} className={`px-4 py-2 rounded-full font-semibold transition-all ${activeTab === 'analytics' ? 'bg-gradient-to-r from-green-600 to-blue-600 text-white shadow' : 'bg-white/80 hover:bg-white text-gray-700 shadow-sm'}`}>Analytics</button>
       </div>
       <div className={`mb-6 flex flex-wrap gap-2 items-center ${activeTab === 'menu' ? '' : 'hidden'}`}>
         <input
@@ -288,11 +289,11 @@ const StudentDashboard: React.FC = () => {
           placeholder="Search menu..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-green-400 transition-all"
+          className="px-4 py-2 border rounded-full bg-white/80 shadow focus:outline-none focus:ring-2 focus:ring-green-400 transition-all"
         />
-        <button onClick={() => setCategory('')} className={`px-4 py-2 rounded-full font-semibold ${!category ? 'bg-green-700 text-white' : 'bg-gray-200'}`}>All</button>
+        <button onClick={() => setCategory('')} className={`px-4 py-2 rounded-full font-semibold transition-all ${!category ? 'bg-gradient-to-r from-green-600 to-blue-600 text-white shadow' : 'bg-white/80 hover:bg-white text-gray-700 shadow-sm'}`}>All</button>
         {categories.map(cat => (
-          <button key={cat} onClick={() => setCategory(cat)} className={`px-4 py-2 rounded-full font-semibold ${category === cat ? 'bg-green-700 text-white' : 'bg-gray-200'}`}>{cat}</button>
+          <button key={cat} onClick={() => setCategory(cat)} className={`px-4 py-2 rounded-full font-semibold transition-all ${category === cat ? 'bg-gradient-to-r from-green-600 to-blue-600 text-white shadow' : 'bg-white/80 hover:bg-white text-gray-700 shadow-sm'}`}>{cat}</button>
         ))}
       </div>
       {/* Combo cart and recommendations */}
@@ -378,7 +379,7 @@ const StudentDashboard: React.FC = () => {
         <div className="space-y-4">
           {orders.length === 0 && <div className="text-gray-500">No orders yet.</div>}
           {orders.map(order => (
-            <div key={order.id} className="bg-white rounded-lg shadow p-4 flex flex-col md:flex-row md:items-center md:justify-between transition-all duration-200">
+            <div key={order.id} className="bg-white/90 rounded-xl shadow-lg p-4 border-l-4 border-green-300/70 hover:shadow-xl flex flex-col md:flex-row md:items-center md:justify-between transition-all duration-200">
               <div>
                 <div className="font-semibold">Order #{order.id}</div>
                 <div className="text-gray-600 text-sm">Status: <span className="font-bold text-green-700">{order.status}</span></div>
@@ -473,6 +474,7 @@ const StudentDashboard: React.FC = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

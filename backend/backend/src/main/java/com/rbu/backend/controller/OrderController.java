@@ -1,6 +1,6 @@
 package com.rbu.backend.controller;
 
-import com.rbu.backend.Order;
+import com.rbu.backend.Entities.Order;
 import com.rbu.backend.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

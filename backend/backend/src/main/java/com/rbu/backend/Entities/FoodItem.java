@@ -1,4 +1,4 @@
-package com.rbu.backend;
+package com.rbu.backend.Entities;
 
 import jakarta.persistence.*;
 

@@ -1,6 +1,6 @@
 package com.rbu.backend.controller;
 
-import com.rbu.backend.FoodItem;
+import com.rbu.backend.Entities.FoodItem;
 import com.rbu.backend.service.RecommendationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
