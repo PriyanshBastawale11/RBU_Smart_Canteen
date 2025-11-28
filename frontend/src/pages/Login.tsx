@@ -39,24 +39,63 @@ const Login: React.FC = () => {
     }
   };
 
+  const [showPass, setShowPass] = useState(false);
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-      <h1 className="text-3xl font-bold mb-4">RBU Smart Canteen Login</h1>
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow w-80">
-        <div className="mb-4">
-          <label className="block mb-1 font-medium">Username</label>
-          <input type="text" value={username} onChange={e => setUsername(e.target.value)} required className="w-full border px-3 py-2 rounded" />
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-indigo-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch animate-fadeIn">
+        <div className="hidden md:flex bg-gradient-to-br from-green-600 to-blue-600 rounded-2xl text-white p-8 shadow-2xl flex-col justify-between">
+          <div>
+            <div className="text-3xl font-extrabold tracking-tight">RBU Smart Canteen</div>
+            <div className="mt-2 text-white/90">Fast, smart and secure ordering experience.</div>
+          </div>
+          <ul className="mt-6 space-y-3 text-white/90 text-sm">
+            <li className="flex items-center gap-2"><span className="inline-block w-2 h-2 bg-white rounded-full"/> One-tap payments</li>
+            <li className="flex items-center gap-2"><span className="inline-block w-2 h-2 bg-white rounded-full"/> Real-time order tracking</li>
+            <li className="flex items-center gap-2"><span className="inline-block w-2 h-2 bg-white rounded-full"/> Personalized analytics</li>
+          </ul>
+          <div className="text-xs text-white/70">© {new Date().getFullYear()} RBU. All rights reserved.</div>
         </div>
-        <div className="mb-4">
-          <label className="block mb-1 font-medium">Password</label>
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)} required className="w-full border px-3 py-2 rounded" />
+        <div className="bg-white/90 backdrop-blur rounded-2xl p-8 shadow-2xl">
+          <div className="mb-6">
+            <div className="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-blue-600">Welcome back</div>
+            <div className="text-sm text-gray-500">Sign in to continue</div>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block mb-1 font-medium text-gray-700">Username</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={username}
+                  onChange={e => setUsername(e.target.value)}
+                  required
+                  className="w-full border border-gray-200 focus:border-green-400 focus:ring-2 focus:ring-green-200 px-3 py-2 rounded-lg outline-none transition"
+                  placeholder="Enter your username"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block mb-1 font-medium text-gray-700">Password</label>
+              <div className="relative">
+                <input
+                  type={showPass ? 'text' : 'password'}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                  className="w-full border border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 px-3 py-2 rounded-lg outline-none transition pr-16"
+                  placeholder="••••••••"
+                />
+                <button type="button" onClick={() => setShowPass(s => !s)} className="absolute right-2 top-1/2 -translate-y-1/2 text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700">{showPass ? 'Hide' : 'Show'}</button>
+              </div>
+            </div>
+            {error && <div className="text-red-600 text-sm">{error}</div>}
+            <button type="submit" className="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-2.5 rounded-lg font-semibold shadow hover:from-green-700 hover:to-blue-700 transition">
+              Sign in
+            </button>
+            <div className="text-sm text-center text-gray-600">No account? <Link to="/register" className="text-green-700 hover:underline">Create a student account</Link></div>
+          </form>
         </div>
-        {error && <div className="mb-2 text-red-600 text-sm">{error}</div>}
-        <button type="submit" className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Login</button>
-        <div className="mt-3 text-sm text-center">
-          <Link to="/register" className="text-green-700 hover:underline">Create a student account</Link>
-        </div>
-      </form>
+      </div>
     </div>
   );
 };

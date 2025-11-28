@@ -24,6 +24,11 @@ public class AnalyticsController {
         return analyticsService.getAveragePreparationTime();
     }
 
+    @PostMapping("/average-prep-time/reset")
+    public void resetAveragePreparationTime() {
+        analyticsService.resetAveragePreparation();
+    }
+
     @GetMapping("/peak-hours")
     public Map<String, Long> getPeakHours() {
         return analyticsService.getPeakHours();

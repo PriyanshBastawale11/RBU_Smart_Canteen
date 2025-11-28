@@ -98,6 +98,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/orders/*/wait-time").authenticated()
 
                 // Recommendations, analytics, payments, coupons accessible to any authenticated user
+                .requestMatchers(HttpMethod.POST, "/api/analytics/average-prep-time/reset").hasAnyRole("ADMIN", "STAFF")
                 .requestMatchers("/api/recommendations/**").authenticated()
                 .requestMatchers("/api/analytics/**").authenticated()
                 // Preflight across the app

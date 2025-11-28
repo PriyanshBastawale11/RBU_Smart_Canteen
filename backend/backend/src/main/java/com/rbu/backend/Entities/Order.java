@@ -18,7 +18,7 @@ public class Order {
     @JsonIgnore
     private User user;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "order_items",
         joinColumns = @JoinColumn(name = "order_id"),
@@ -36,6 +36,7 @@ public class Order {
     private LocalDateTime orderTime;
 
     private LocalDateTime completedTime;
+    private LocalDateTime readyTime;
     
     @Column
     private String couponCode;
@@ -55,6 +56,8 @@ public class Order {
     public void setOrderTime(LocalDateTime orderTime) { this.orderTime = orderTime; }
     public LocalDateTime getCompletedTime() { return completedTime; }
     public void setCompletedTime(LocalDateTime completedTime) { this.completedTime = completedTime; }
+    public LocalDateTime getReadyTime() { return readyTime; }
+    public void setReadyTime(LocalDateTime readyTime) { this.readyTime = readyTime; }
     public String getCouponCode() { return couponCode; }
     public void setCouponCode(String couponCode) { this.couponCode = couponCode; }
 }

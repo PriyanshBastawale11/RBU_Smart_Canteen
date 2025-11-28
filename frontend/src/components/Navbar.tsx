@@ -12,7 +12,7 @@ const Navbar: React.FC = () => {
   return (
     <nav className="bg-white shadow mb-4">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <span className="font-bold text-xl text-green-700">RBU Smart Canteen</span>
+        <span className="font-bold text-xl text-green-700">Snack-Shalla</span>
         <div className="space-x-4">
           {!isAuthenticated() && <Link to="/login" className="text-gray-700 hover:text-green-700">Login</Link>}
           {!isAuthenticated() && <Link to="/register" className="text-gray-700 hover:text-green-700">Register</Link>}

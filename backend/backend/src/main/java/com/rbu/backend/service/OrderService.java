@@ -61,6 +61,8 @@ public class OrderService {
             order.setStatus(status);
             if (status.equals("COMPLETED") || status.equals("CANCELLED")) {
                 order.setCompletedTime(LocalDateTime.now());
+            } else if (status.equals("READY")) {
+                order.setReadyTime(LocalDateTime.now());
             }
             return orderRepository.save(order);
         }).orElseThrow();

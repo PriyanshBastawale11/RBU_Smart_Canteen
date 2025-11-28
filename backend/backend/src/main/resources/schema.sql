@@ -1,7 +1,7 @@
 -- Drop existing tables if they exist
-DROP TABLE IF EXISTS user_roles CASCADE;
-DROP TABLE IF EXISTS users CASCADE;
-DROP TABLE IF EXISTS otp_tokens CASCADE;
+-- DROP TABLE IF EXISTS user_roles CASCADE;
+-- DROP TABLE IF EXISTS users CASCADE;
+-- DROP TABLE IF EXISTS otp_tokens CASCADE;
 
 -- Create users table
 CREATE TABLE users (

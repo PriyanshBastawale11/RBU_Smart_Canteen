@@ -51,4 +51,34 @@ public class PaymentController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @PostMapping("/razorpay/order")
+    public ResponseEntity<Map<String, Object>> createRazorpayOrder(@RequestBody Map<String, Object> payload) {
+        try {
+            Long orderId = Long.valueOf(payload.get("orderId").toString());
+            System.out.println("[PAY] createRazorpayOrder orderId=" + orderId);
+            Map<String, Object> data = paymentService.createRazorpayOrder(orderId);
+            return ResponseEntity.ok(data);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/razorpay/verify")
+    public ResponseEntity<Map<String, Object>> verifyRazorpay(@RequestBody Map<String, Object> payload) {
+        try {
+            Long orderId = Long.valueOf(payload.get("orderId").toString());
+            String razorpayOrderId = payload.get("razorpayOrderId").toString();
+            String razorpayPaymentId = payload.get("razorpayPaymentId").toString();
+            String razorpaySignature = payload.get("razorpaySignature").toString();
+
+            System.out.println("[PAY] verifyRazorpay orderId=" + orderId + " rzpOrderId=" + razorpayOrderId);
+            Map<String, Object> resp = paymentService.verifyRazorpayPayment(orderId, razorpayOrderId, razorpayPaymentId, razorpaySignature);
+            Coupon coupon = couponService.getByOrderId(orderId);
+            resp.put("couponCode", coupon != null ? coupon.getCode() : null);
+            return ResponseEntity.ok(resp);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 }
